@@ -128,7 +128,39 @@
 	margin-right: auto;
 }
 
+.cookie-samtykke-flydende {
+	position: fixed;
+	z-index: 999998;
+	left: 16px;
+	bottom: 16px;
+	width: 46px;
+	height: 46px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: var( --cs-accent, #f7c24b );
+	color: var( --cs-accent-text, #1b1b1b );
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	box-shadow: 0 8px 20px -8px rgba( 0, 0, 0, 0.5 );
+}
+.cookie-samtykke-flydende[hidden] {
+	display: none;
+}
+.cookie-samtykke-flydende svg {
+	width: 24px;
+	height: 24px;
+}
+
 @media ( max-width: 640px ) {
+	.cookie-samtykke-flydende {
+		left: 10px;
+		bottom: 10px;
+		width: 42px;
+		height: 42px;
+	}
 	.cookie-samtykke {
 		padding: 10px;
 	}

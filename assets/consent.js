@@ -72,6 +72,7 @@
 		if ( ! banner ) {
 			return;
 		}
+		var flydende  = document.getElementById( 'cookie-samtykke-flydende' );
 		var detaljer  = banner.querySelector( '.cookie-samtykke__detaljer' );
 		var knapTilpas = banner.querySelector( '[data-cs-action="tilpas"]' );
 		var knapGem    = banner.querySelector( '[data-cs-action="gem"]' );
@@ -93,9 +94,15 @@
 			aktiverGatedeScripts( samtykke );
 			dispatchOpdateret( samtykke );
 			banner.setAttribute( 'hidden', '' );
+			if ( flydende ) {
+				flydende.removeAttribute( 'hidden' );
+			}
 		}
 
 		function visBanner() {
+			if ( flydende ) {
+				flydende.setAttribute( 'hidden', '' );
+			}
 			var eksisterende = hentSamtykke();
 			if ( eksisterende ) {
 				checkboxe.forEach( function ( cb ) {
@@ -136,6 +143,9 @@
 		var eksisterende = hentSamtykke();
 		if ( eksisterende ) {
 			aktiverGatedeScripts( eksisterende );
+			if ( flydende ) {
+				flydende.removeAttribute( 'hidden' );
+			}
 		} else {
 			visBanner();
 		}

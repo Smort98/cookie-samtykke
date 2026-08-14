@@ -69,6 +69,17 @@ function cookie_samtykke_registrer_indstillinger() {
 	);
 	register_setting(
 		'cookie_samtykke',
+		'cookie_samtykke_flydende_ikon',
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => function ( $v ) {
+				return ! empty( $v );
+			},
+			'default'           => true,
+		)
+	);
+	register_setting(
+		'cookie_samtykke',
 		'cookie_samtykke_kategorier',
 		array(
 			'type'              => 'array',
@@ -121,6 +132,19 @@ function cookie_samtykke_menu() {
 }
 add_action( 'admin_menu', 'cookie_samtykke_menu' );
 
+function cookie_samtykke_generer_besked() {
+	if ( ! isset( $_GET['cs_genereret'], $_GET['page'] ) || 'cookie-samtykke' !== $_GET['page'] ) {
+		return;
+	}
+	$type  = sanitize_key( wp_unslash( $_GET['cs_genereret'] ) );
+	$navne = array( 'privatliv' => 'Privatlivspolitik', 'cookiepolitik' => 'Cookiepolitik' );
+	if ( ! isset( $navne[ $type ] ) ) {
+		return;
+	}
+	printf( '<div class="notice notice-success is-dismissible"><p>%s-siden er oprettet/opdateret.</p></div>', esc_html( $navne[ $type ] ) );
+}
+add_action( 'admin_notices', 'cookie_samtykke_generer_besked' );
+
 function cookie_samtykke_admin_assets( string $hook ) {
 	if ( 'settings_page_cookie-samtykke' !== $hook ) {
 		return;
@@ -138,6 +162,7 @@ function cookie_samtykke_render_side() {
 	$farvetilstand = get_option( 'cookie_samtykke_farvetilstand', 'auto' );
 	$manuel        = wp_parse_args( get_option( 'cookie_samtykke_manuelle_farver', array() ), COOKIE_SAMTYKKE_STANDARD_FARVER );
 	$position      = get_option( 'cookie_samtykke_position', 'bjaelke' );
+	$flydende_ikon = (bool) get_option( 'cookie_samtykke_flydende_ikon', true );
 	$kategorier    = wp_parse_args( get_option( 'cookie_samtykke_kategorier', array() ), array( 'statistik' => true, 'marketing' => true ) );
 	$privatliv     = (int) get_option( 'cookie_samtykke_privatliv_side', 0 );
 	$tekster       = cookie_samtykke_hent_tekster();
@@ -189,6 +214,12 @@ function cookie_samtykke_render_side() {
 							<option value="bjaelke" <?php selected( $position, 'bjaelke' ); ?>>Fuld bredde-bjælke i bunden</option>
 							<option value="kort" <?php selected( $position, 'kort' ); ?>>Lille kort i hjørnet</option>
 						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">Flydende ikon</th>
+					<td>
+						<label><input type="checkbox" name="cookie_samtykke_flydende_ikon" value="1" <?php checked( $flydende_ikon ); ?>> Vis et lille flydende ikon nederst, så besøgende altid nemt kan genåbne cookie-indstillingerne</label>
 					</td>
 				</tr>
 			</table>
@@ -252,6 +283,36 @@ function cookie_samtykke_render_side() {
 
 			<?php submit_button( 'Gem indstillinger' ); ?>
 		</form>
+
+		<h2 class="title">Opret sider automatisk</h2>
+		<p>Opretter en side med udfyldt standardtekst om privatliv og cookies, baseret på indstillingerne ovenfor. Teksten er et generelt udgangspunkt — læs den igennem og tilpas den, så den passer til jer, inden siden bruges i praksis.</p>
+		<table class="form-table" role="presentation">
+			<?php cookie_samtykke_render_generer_raekke( 'privatliv', 'Privatlivspolitik', (int) get_option( 'cookie_samtykke_privatliv_side', 0 ) ); ?>
+			<?php cookie_samtykke_render_generer_raekke( 'cookiepolitik', 'Cookiepolitik', (int) get_option( 'cookie_samtykke_cookiepolitik_side', 0 ) ); ?>
+		</table>
 	</div>
+	<?php
+}
+
+function cookie_samtykke_render_generer_raekke( string $type, string $titel, int $side_id ) {
+	$side = $side_id ? get_post( $side_id ) : null;
+	?>
+	<tr>
+		<th scope="row"><?php echo esc_html( $titel ); ?></th>
+		<td>
+			<?php if ( $side ) : ?>
+				<p>
+					Side oprettet: <a href="<?php echo esc_url( get_edit_post_link( $side_id ) ); ?>"><?php echo esc_html( $side->post_title ); ?></a>
+					· <a href="<?php echo esc_url( get_permalink( $side_id ) ); ?>" target="_blank" rel="noopener">Vis siden</a>
+				</p>
+			<?php endif; ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" <?php echo $side ? 'onsubmit="return confirm(\'Dette overskriver den nuværende tekst på siden med en ny standardtekst. Fortsæt?\');"' : ''; ?>>
+				<?php wp_nonce_field( 'cookie_samtykke_generer_side' ); ?>
+				<input type="hidden" name="action" value="cookie_samtykke_generer_side">
+				<input type="hidden" name="cs_type" value="<?php echo esc_attr( $type ); ?>">
+				<?php submit_button( $side ? 'Generér indhold igen' : 'Opret side automatisk', $side ? 'secondary' : 'primary', 'submit', false ); ?>
+			</form>
+		</td>
+	</tr>
 	<?php
 }

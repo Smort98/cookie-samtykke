@@ -19,4 +19,5 @@ define( 'COOKIE_SAMTYKKE_URL', plugin_dir_url( __FILE__ ) );
 require_once COOKIE_SAMTYKKE_STI . 'inc/farver.php';
 require_once COOKIE_SAMTYKKE_STI . 'inc/indstillinger.php';
 require_once COOKIE_SAMTYKKE_STI . 'inc/banner.php';
+require_once COOKIE_SAMTYKKE_STI . 'inc/generator.php';
 require_once COOKIE_SAMTYKKE_STI . 'inc/api.php';

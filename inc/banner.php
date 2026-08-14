@@ -93,6 +93,18 @@ function cookie_samtykke_render_banner() {
 		</div>
 	</div>
 	<?php
+	if ( get_option( 'cookie_samtykke_flydende_ikon', true ) ) :
+		?>
+		<button type="button" id="cookie-samtykke-flydende" class="cookie-samtykke-flydende" data-cs-genaabn hidden aria-label="Cookie-indstillinger" title="Cookie-indstillinger">
+			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+				<path d="M21 12.5c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c.34 0 .67.02 1 .05-.98.86-1.5 2-1.5 3.2 0 2.76 2.24 5 5 5 .3 0 .59-.03.87-.08.08.6.13 1.21.13 1.83z" fill="currentColor"/>
+				<circle cx="8.5" cy="10.5" r="1.2" fill="currentColor" opacity="0.55"/>
+				<circle cx="12" cy="15" r="1.2" fill="currentColor" opacity="0.55"/>
+				<circle cx="9" cy="17" r="1" fill="currentColor" opacity="0.55"/>
+			</svg>
+		</button>
+		<?php
+	endif;
 }
 add_action( 'wp_footer', 'cookie_samtykke_render_banner' );
 
