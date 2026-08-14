@@ -42,8 +42,19 @@ function cookie_samtykke_generer_cookiepolitik_indhold(): string {
 	$privatliv_id   = (int) get_option( 'cookie_samtykke_privatliv_side', 0 );
 	$privatliv_link = ( $privatliv_id && get_post( $privatliv_id ) ) ? get_permalink( $privatliv_id ) : '';
 
-	$dele   = array();
-	$dele[] = '<!-- wp:paragraph --><p><em>Denne side er genereret som et generelt udgangspunkt og bør gennemgås, så den passer præcist til de cookies, hjemmesiden faktisk bruger.</em></p><!-- /wp:paragraph -->';
+	$scan_tid       = (int) get_option( 'cookie_samtykke_scan_tidspunkt', 0 );
+	$scan_noegler   = (array) get_option( 'cookie_samtykke_scan_resultat', array() );
+	$alle_tjenester = cookie_samtykke_kendte_tjenester();
+	$fundne         = array_intersect_key( $alle_tjenester, array_flip( $scan_noegler ) );
+
+	$dele = array();
+
+	if ( $scan_tid ) {
+		$dele[] = '<!-- wp:paragraph --><p><em>Denne side er sidst opdateret ud fra en automatisk scanning af sitets kode og indhold den ' . esc_html( date_i18n( 'j. F Y', $scan_tid ) ) . '. Tilføjer I nye tjenester senere (fx et nyt analyse- eller annonceværktøj), bør I scanne igen under Indstillinger → Cookie-samtykke og generere siden på ny.</em></p><!-- /wp:paragraph -->';
+	} else {
+		$dele[] = '<!-- wp:paragraph --><p><em>Denne side er genereret som et generelt udgangspunkt og bør gennemgås, så den passer præcist til de cookies, hjemmesiden faktisk bruger. Under Indstillinger → Cookie-samtykke kan I scanne sitet for kendte tredjepartstjenester og generere siden igen med et mere præcist indhold.</em></p><!-- /wp:paragraph -->';
+	}
+
 	$dele[] = '<!-- wp:paragraph --><p>En cookie er en lille tekstfil, som gemmes på din enhed, når du besøger en hjemmeside. Cookies bruges bl.a. til at få hjemmesiden til at fungere korrekt, til at huske dine valg, og til at forstå, hvordan hjemmesiden bliver brugt.</p><!-- /wp:paragraph -->';
 	$dele[] = '<!-- wp:heading {"level":2} --><h2>Hvilke cookies bruger vi</h2><!-- /wp:heading -->';
 	$dele[] = '<!-- wp:paragraph --><p><strong>' . esc_html( $tekster['nodvendige_navn'] ) . '</strong> — ' . esc_html( $tekster['nodvendige_tekst'] ) . '</p><!-- /wp:paragraph -->';
@@ -53,6 +64,18 @@ function cookie_samtykke_generer_cookiepolitik_indhold(): string {
 	if ( $kategorier['marketing'] ) {
 		$dele[] = '<!-- wp:paragraph --><p><strong>' . esc_html( $tekster['marketing_navn'] ) . '</strong> — ' . esc_html( $tekster['marketing_tekst'] ) . '</p><!-- /wp:paragraph -->';
 	}
+
+	if ( $scan_tid ) {
+		$dele[] = '<!-- wp:heading {"level":2} --><h2>Tjenester vi har fundet på sitet</h2><!-- /wp:heading -->';
+		if ( $fundne ) {
+			foreach ( $fundne as $tjeneste ) {
+				$dele[] = '<!-- wp:paragraph --><p><strong>' . esc_html( $tjeneste['navn'] ) . '</strong> (' . esc_html( cookie_samtykke_kategori_navn( $tjeneste['kategori'] ) ) . ') — ' . esc_html( $tjeneste['beskrivelse'] ) . ' Cookies: ' . esc_html( $tjeneste['cookies'] ) . '. Varighed: ' . esc_html( $tjeneste['varighed'] ) . '.</p><!-- /wp:paragraph -->';
+			}
+		} else {
+			$dele[] = '<!-- wp:paragraph --><p>Vi har ikke fundet tegn på tredjeparts-cookies i sitets kode eller indhold ud over de nødvendige funktioner.</p><!-- /wp:paragraph -->';
+		}
+	}
+
 	$dele[] = '<!-- wp:heading {"level":2} --><h2>Hvor længe gemmes dit samtykke</h2><!-- /wp:heading -->';
 	$dele[] = '<!-- wp:paragraph --><p>Dit valg gemmes i en cookie i op til 365 dage, hvorefter du bliver spurgt igen.</p><!-- /wp:paragraph -->';
 	$dele[] = '<!-- wp:heading {"level":2} --><h2>Sådan ændrer du dit valg</h2><!-- /wp:heading -->';

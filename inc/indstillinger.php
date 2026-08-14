@@ -133,15 +133,19 @@ function cookie_samtykke_menu() {
 add_action( 'admin_menu', 'cookie_samtykke_menu' );
 
 function cookie_samtykke_generer_besked() {
-	if ( ! isset( $_GET['cs_genereret'], $_GET['page'] ) || 'cookie-samtykke' !== $_GET['page'] ) {
+	if ( ! isset( $_GET['page'] ) || 'cookie-samtykke' !== $_GET['page'] ) {
 		return;
 	}
-	$type  = sanitize_key( wp_unslash( $_GET['cs_genereret'] ) );
-	$navne = array( 'privatliv' => 'Privatlivspolitik', 'cookiepolitik' => 'Cookiepolitik' );
-	if ( ! isset( $navne[ $type ] ) ) {
-		return;
+	if ( isset( $_GET['cs_genereret'] ) ) {
+		$type  = sanitize_key( wp_unslash( $_GET['cs_genereret'] ) );
+		$navne = array( 'privatliv' => 'Privatlivspolitik', 'cookiepolitik' => 'Cookiepolitik' );
+		if ( isset( $navne[ $type ] ) ) {
+			printf( '<div class="notice notice-success is-dismissible"><p>%s-siden er oprettet/opdateret.</p></div>', esc_html( $navne[ $type ] ) );
+		}
 	}
-	printf( '<div class="notice notice-success is-dismissible"><p>%s-siden er oprettet/opdateret.</p></div>', esc_html( $navne[ $type ] ) );
+	if ( isset( $_GET['cs_scannet'] ) ) {
+		echo '<div class="notice notice-success is-dismissible"><p>Scanning fuldført.</p></div>';
+	}
 }
 add_action( 'admin_notices', 'cookie_samtykke_generer_besked' );
 
@@ -282,6 +286,55 @@ function cookie_samtykke_render_side() {
 			</table>
 
 			<?php submit_button( 'Gem indstillinger' ); ?>
+		</form>
+
+		<h2 class="title">Tjenester fundet på sitet</h2>
+		<p>Scanner temaets og de aktive plugins' kildekode samt indholdet af alle offentliggjorte sider/indlæg for kendte tredjepartstjenester (fx Google Analytics, Facebook Pixel, YouTube, Google Maps). Bruges automatisk til at udfylde cookiepolitikken med det, sitet faktisk bruger, i stedet for generisk tekst.</p>
+		<?php
+		$scan_tid       = (int) get_option( 'cookie_samtykke_scan_tidspunkt', 0 );
+		$scan_resultat  = (array) get_option( 'cookie_samtykke_scan_resultat', array() );
+		$scan_kode      = (array) get_option( 'cookie_samtykke_scan_kode_resultat', array() );
+		$alle_tjenester = cookie_samtykke_kendte_tjenester();
+		?>
+		<?php if ( $scan_tid ) : ?>
+			<p>Sidst scannet: <?php echo esc_html( date_i18n( 'j. F Y \k\l. H:i', $scan_tid ) ); ?></p>
+			<p><strong>Fundet i sidernes indhold</strong> (bruges direkte i den genererede cookiepolitik):</p>
+			<?php if ( $scan_resultat ) : ?>
+				<ul style="list-style:disc;margin-left:20px;">
+					<?php
+					foreach ( $scan_resultat as $noegle ) :
+						if ( ! isset( $alle_tjenester[ $noegle ] ) ) {
+							continue;
+						}
+						$t = $alle_tjenester[ $noegle ];
+						?>
+						<li><strong><?php echo esc_html( $t['navn'] ); ?></strong> (<?php echo esc_html( cookie_samtykke_kategori_navn( $t['kategori'] ) ); ?>) — <?php echo esc_html( $t['cookies'] ); ?></li>
+					<?php endforeach; ?>
+				</ul>
+			<?php else : ?>
+				<p>Ingen kendte tredjepartstjenester fundet i indholdet.</p>
+			<?php endif; ?>
+			<?php if ( $scan_kode ) : ?>
+				<p><strong>Understøttet af temaets/pluginnernes kode</strong> (kun til info — betyder ikke nødvendigvis, at det er i brug på siden, så tilføjes ikke automatisk til cookiepolitikken):</p>
+				<ul style="list-style:disc;margin-left:20px;color:#646970;">
+					<?php
+					foreach ( $scan_kode as $noegle ) :
+						if ( ! isset( $alle_tjenester[ $noegle ] ) ) {
+							continue;
+						}
+						$t = $alle_tjenester[ $noegle ];
+						?>
+						<li><?php echo esc_html( $t['navn'] ); ?></li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		<?php else : ?>
+			<p><em>Ikke scannet endnu.</em></p>
+		<?php endif; ?>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<?php wp_nonce_field( 'cookie_samtykke_scan' ); ?>
+			<input type="hidden" name="action" value="cookie_samtykke_scan">
+			<?php submit_button( $scan_tid ? 'Scan igen' : 'Scan sitet nu', 'secondary', 'submit', false ); ?>
 		</form>
 
 		<h2 class="title">Opret sider automatisk</h2>
