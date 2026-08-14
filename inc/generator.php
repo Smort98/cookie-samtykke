@@ -63,7 +63,9 @@ function cookie_samtykke_generer_privatlivspolitik_indhold(): string {
 	$dele[] = '<!-- wp:paragraph --><p>Vi bruger som udgangspunkt kun leverandører og databehandlere inden for EU/EØS. Anvender vi enkelte tjenester uden for EU/EØS (fx via cookies fra tredjepart, se cookiepolitikken), sker det altid under de fornødne garantier, herunder EU-Kommissionens standardkontraktbestemmelser.</p><!-- /wp:paragraph -->';
 
 	$dele[] = '<!-- wp:heading {"level":2} --><h2>Dine rettigheder</h2><!-- /wp:heading -->';
-	$dele[] = '<!-- wp:paragraph --><p>Du har efter databeskyttelsesforordningen en række rettigheder i forhold til vores behandling af oplysninger om dig. Du kan bl.a. bede om indsigt i, berigtigelse af eller sletning af dine personoplysninger, og du kan gøre indsigelse mod behandlingen. Kontakt os på <a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>, hvis du vil gøre brug af dine rettigheder.</p><!-- /wp:paragraph -->';
+	$dele[] = '<!-- wp:paragraph --><p>Du har efter databeskyttelsesforordningen en række rettigheder i forhold til vores behandling af oplysninger om dig, herunder retten til indsigt, berigtigelse, sletning og indsigelse. Du kan få tilsendt en oversigt over dine oplysninger eller bede om at få dem slettet nedenfor. Ønsker du at gøre brug af andre rettigheder, fx berigtigelse eller indsigelse, er du velkommen til at kontakte os på <a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>.</p><!-- /wp:paragraph -->';
+
+	$dele = array_merge( $dele, cookie_samtykke_byg_dine_oplysninger_afsnit( false ) );
 
 	$dele[] = '<!-- wp:heading {"level":2} --><h2>Klage</h2><!-- /wp:heading -->';
 	$dele[] = '<!-- wp:paragraph --><p>Du kan klage til Datatilsynet, <a href="https://www.datatilsynet.dk" target="_blank" rel="noopener">www.datatilsynet.dk</a>, hvis du er utilfreds med vores behandling af dine personoplysninger.</p><!-- /wp:paragraph -->';
@@ -145,13 +147,27 @@ function cookie_samtykke_generer_cookiepolitik_indhold(): string {
 		$dele[] = '<!-- wp:paragraph --><p>Du kan læse mere om, hvordan vi generelt behandler personoplysninger, i vores <a href="' . esc_url( $privatliv_link ) . '">privatlivspolitik</a>.</p><!-- /wp:paragraph -->';
 	}
 
-	if ( shortcode_exists( 'cookie_samtykke_slet_data' ) ) {
-		$dele[] = '<!-- wp:heading {"level":2} --><h2>Anmod om sletning af dine oplysninger</h2><!-- /wp:heading -->';
-		$dele[] = '<!-- wp:paragraph --><p>Har du tidligere skrevet til os via en formular på hjemmesiden, kan du bede om at få dine oplysninger slettet. Vi sender en bekræftelses-mail, så vi er sikre på, at det er dig — klik på linket i mailen, så slettes oplysningerne automatisk.</p><!-- /wp:paragraph -->';
-		$dele[] = '<!-- wp:shortcode -->[cookie_samtykke_slet_data]<!-- /wp:shortcode -->';
-	}
+	$dele = array_merge( $dele, cookie_samtykke_byg_dine_oplysninger_afsnit() );
 
 	return cookie_samtykke_pak_indhold( implode( "\n\n", $dele ) );
+}
+
+/**
+ * Fælles "Dine oplysninger"-afsnit med download- og sletteknap —
+ * genbruges på både privatlivspolitikken og cookiepolitikken.
+ */
+function cookie_samtykke_byg_dine_oplysninger_afsnit( bool $med_overskrift = true ): array {
+	if ( ! shortcode_exists( 'cookie_samtykke_slet_data' ) ) {
+		return array();
+	}
+	$dele = array();
+	if ( $med_overskrift ) {
+		$dele[] = '<!-- wp:heading {"level":2} --><h2>Dine oplysninger</h2><!-- /wp:heading -->';
+	}
+	$dele[] = '<!-- wp:paragraph --><p>Har du tidligere skrevet til os via en formular på hjemmesiden, kan du få tilsendt en oversigt over de oplysninger, vi har liggende på dig, eller bede om at få dem slettet. Vi sender en bekræftelses-mail til den indtastede adresse, så vi er sikre på, at det er dig — klik på linket i mailen for at gennemføre anmodningen.</p><!-- /wp:paragraph -->';
+	$dele[] = '<!-- wp:shortcode -->[cookie_samtykke_download_data]<!-- /wp:shortcode -->';
+	$dele[] = '<!-- wp:shortcode -->[cookie_samtykke_slet_data]<!-- /wp:shortcode -->';
+	return $dele;
 }
 
 function cookie_samtykke_haandter_generer_side() {
