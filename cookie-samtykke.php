@@ -21,4 +21,5 @@ require_once COOKIE_SAMTYKKE_STI . 'inc/indstillinger.php';
 require_once COOKIE_SAMTYKKE_STI . 'inc/banner.php';
 require_once COOKIE_SAMTYKKE_STI . 'inc/scanner.php';
 require_once COOKIE_SAMTYKKE_STI . 'inc/generator.php';
+require_once COOKIE_SAMTYKKE_STI . 'inc/sletning.php';
 require_once COOKIE_SAMTYKKE_STI . 'inc/api.php';

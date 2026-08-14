@@ -122,9 +122,21 @@ function cookie_samtykke_registrer_indstillinger() {
 add_action( 'admin_init', 'cookie_samtykke_registrer_indstillinger' );
 
 function cookie_samtykke_menu() {
-	add_options_page(
+	add_menu_page(
 		'Cookie-samtykke',
 		'Cookie-samtykke',
+		'manage_options',
+		'cookie-samtykke',
+		'cookie_samtykke_render_side',
+		'dashicons-privacy',
+		80
+	);
+	// Omdøber det automatisk oprettede første undermenupunkt (som ellers
+	// ville hedde det samme som topmenuen) til "Indstillinger".
+	add_submenu_page(
+		'cookie-samtykke',
+		'Indstillinger',
+		'Indstillinger',
 		'manage_options',
 		'cookie-samtykke',
 		'cookie_samtykke_render_side'
@@ -150,7 +162,7 @@ function cookie_samtykke_generer_besked() {
 add_action( 'admin_notices', 'cookie_samtykke_generer_besked' );
 
 function cookie_samtykke_admin_assets( string $hook ) {
-	if ( 'settings_page_cookie-samtykke' !== $hook ) {
+	if ( 'toplevel_page_cookie-samtykke' !== $hook ) {
 		return;
 	}
 	wp_enqueue_style( 'wp-color-picker' );

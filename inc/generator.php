@@ -35,6 +35,25 @@ function cookie_samtykke_generer_privatlivspolitik_indhold(): string {
 	return implode( "\n\n", $dele );
 }
 
+function cookie_samtykke_byg_tabel_blok( array $header, array $raekker ): string {
+	$thead = '<tr>';
+	foreach ( $header as $celle ) {
+		$thead .= '<th>' . esc_html( $celle ) . '</th>';
+	}
+	$thead .= '</tr>';
+
+	$tbody = '';
+	foreach ( $raekker as $raekke ) {
+		$tbody .= '<tr>';
+		foreach ( $raekke as $celle ) {
+			$tbody .= '<td>' . esc_html( $celle ) . '</td>';
+		}
+		$tbody .= '</tr>';
+	}
+
+	return '<!-- wp:table --><figure class="wp-block-table"><table><thead>' . $thead . '</thead><tbody>' . $tbody . '</tbody></table></figure><!-- /wp:table -->';
+}
+
 function cookie_samtykke_generer_cookiepolitik_indhold(): string {
 	$tekster    = cookie_samtykke_hent_tekster();
 	$kategorier = wp_parse_args( get_option( 'cookie_samtykke_kategorier', array() ), array( 'statistik' => true, 'marketing' => true ) );
@@ -49,13 +68,13 @@ function cookie_samtykke_generer_cookiepolitik_indhold(): string {
 
 	$dele = array();
 
-	if ( $scan_tid ) {
-		$dele[] = '<!-- wp:paragraph --><p><em>Denne side er sidst opdateret ud fra en automatisk scanning af sitets kode og indhold den ' . esc_html( date_i18n( 'j. F Y', $scan_tid ) ) . '. Tilføjer I nye tjenester senere (fx et nyt analyse- eller annonceværktøj), bør I scanne igen under Indstillinger → Cookie-samtykke og generere siden på ny.</em></p><!-- /wp:paragraph -->';
-	} else {
-		$dele[] = '<!-- wp:paragraph --><p><em>Denne side er genereret som et generelt udgangspunkt og bør gennemgås, så den passer præcist til de cookies, hjemmesiden faktisk bruger. Under Indstillinger → Cookie-samtykke kan I scanne sitet for kendte tredjepartstjenester og generere siden igen med et mere præcist indhold.</em></p><!-- /wp:paragraph -->';
-	}
+	$opdateret_tekst = $scan_tid
+		? 'Sidst opdateret: ' . date_i18n( 'j. F Y', $scan_tid )
+		: 'Endnu ikke scannet — se Indstillinger → Cookie-samtykke.';
+	$dele[] = '<!-- wp:paragraph --><p style="font-size:0.9em;opacity:0.7;">' . esc_html( $opdateret_tekst ) . '</p><!-- /wp:paragraph -->';
 
 	$dele[] = '<!-- wp:paragraph --><p>En cookie er en lille tekstfil, som gemmes på din enhed, når du besøger en hjemmeside. Cookies bruges bl.a. til at få hjemmesiden til at fungere korrekt, til at huske dine valg, og til at forstå, hvordan hjemmesiden bliver brugt.</p><!-- /wp:paragraph -->';
+
 	$dele[] = '<!-- wp:heading {"level":2} --><h2>Hvilke cookies bruger vi</h2><!-- /wp:heading -->';
 	$dele[] = '<!-- wp:paragraph --><p><strong>' . esc_html( $tekster['nodvendige_navn'] ) . '</strong> — ' . esc_html( $tekster['nodvendige_tekst'] ) . '</p><!-- /wp:paragraph -->';
 	if ( $kategorier['statistik'] ) {
@@ -65,23 +84,35 @@ function cookie_samtykke_generer_cookiepolitik_indhold(): string {
 		$dele[] = '<!-- wp:paragraph --><p><strong>' . esc_html( $tekster['marketing_navn'] ) . '</strong> — ' . esc_html( $tekster['marketing_tekst'] ) . '</p><!-- /wp:paragraph -->';
 	}
 
-	if ( $scan_tid ) {
-		$dele[] = '<!-- wp:heading {"level":2} --><h2>Tjenester vi har fundet på sitet</h2><!-- /wp:heading -->';
-		if ( $fundne ) {
-			foreach ( $fundne as $tjeneste ) {
-				$dele[] = '<!-- wp:paragraph --><p><strong>' . esc_html( $tjeneste['navn'] ) . '</strong> (' . esc_html( cookie_samtykke_kategori_navn( $tjeneste['kategori'] ) ) . ') — ' . esc_html( $tjeneste['beskrivelse'] ) . ' Cookies: ' . esc_html( $tjeneste['cookies'] ) . '. Varighed: ' . esc_html( $tjeneste['varighed'] ) . '.</p><!-- /wp:paragraph -->';
-			}
-		} else {
-			$dele[] = '<!-- wp:paragraph --><p>Vi har ikke fundet tegn på tredjeparts-cookies i sitets kode eller indhold ud over de nødvendige funktioner.</p><!-- /wp:paragraph -->';
-		}
+	$raekker   = array();
+	$raekker[] = array( 'Nødvendig funktionscookie', cookie_samtykke_kategori_navn( 'nodvendige' ), 'cookie_samtykke', '365 dage', 'Kun os selv' );
+	foreach ( $fundne as $tjeneste ) {
+		$raekker[] = array(
+			$tjeneste['navn'],
+			cookie_samtykke_kategori_navn( $tjeneste['kategori'] ),
+			$tjeneste['cookies'],
+			$tjeneste['varighed'],
+			$tjeneste['databehandler'],
+		);
+	}
+	$dele[] = cookie_samtykke_byg_tabel_blok( array( 'Navn', 'Kategori', 'Cookie(s)', 'Varighed', 'Hvem har adgang' ), $raekker );
+
+	if ( $scan_tid && ! $fundne ) {
+		$dele[] = '<!-- wp:paragraph --><p>Vi har ikke fundet tegn på andre cookies i sitets indhold.</p><!-- /wp:paragraph -->';
+	} elseif ( ! $scan_tid ) {
+		$dele[] = '<!-- wp:paragraph --><p>Listen er endnu ikke scannet og viser derfor kun den nødvendige funktionscookie. Scan sitet under Indstillinger → Cookie-samtykke for en mere præcis liste.</p><!-- /wp:paragraph -->';
 	}
 
-	$dele[] = '<!-- wp:heading {"level":2} --><h2>Hvor længe gemmes dit samtykke</h2><!-- /wp:heading -->';
-	$dele[] = '<!-- wp:paragraph --><p>Dit valg gemmes i en cookie i op til 365 dage, hvorefter du bliver spurgt igen.</p><!-- /wp:paragraph -->';
 	$dele[] = '<!-- wp:heading {"level":2} --><h2>Sådan ændrer du dit valg</h2><!-- /wp:heading -->';
-	$dele[] = '<!-- wp:paragraph --><p>Du kan til enhver tid ændre dit samtykke ved at klikke på cookie-ikonet nederst på siden, eller via linket her: [cookie_samtykke_link]Ændr cookie-indstillinger[/cookie_samtykke_link]</p><!-- /wp:paragraph -->';
+	$dele[] = '<!-- wp:paragraph --><p>Du kan til enhver tid ændre dit samtykke via ikonet nederst i venstre hjørne af siden, eller ved at [cookie_samtykke_link]klikke her[/cookie_samtykke_link].</p><!-- /wp:paragraph -->';
 	if ( $privatliv_link ) {
 		$dele[] = '<!-- wp:paragraph --><p>Du kan læse mere om, hvordan vi generelt behandler personoplysninger, i vores <a href="' . esc_url( $privatliv_link ) . '">privatlivspolitik</a>.</p><!-- /wp:paragraph -->';
+	}
+
+	if ( shortcode_exists( 'cookie_samtykke_slet_data' ) ) {
+		$dele[] = '<!-- wp:heading {"level":2} --><h2>Anmod om sletning af dine oplysninger</h2><!-- /wp:heading -->';
+		$dele[] = '<!-- wp:paragraph --><p>Har du tidligere skrevet til os via en formular på hjemmesiden, kan du bede om at få dine oplysninger slettet. Vi sender en bekræftelses-mail, så vi er sikre på, at det er dig — klik på linket i mailen, så slettes oplysningerne automatisk.</p><!-- /wp:paragraph -->';
+		$dele[] = '<!-- wp:shortcode -->[cookie_samtykke_slet_data]<!-- /wp:shortcode -->';
 	}
 
 	return implode( "\n\n", $dele );

@@ -154,7 +154,59 @@
 	height: 24px;
 }
 
+.cookie-samtykke-sletteformular {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 12px;
+	margin: 16px 0;
+}
+.cookie-samtykke-sletteformular__felt label {
+	display: block;
+	font-size: 13px;
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+.cookie-samtykke-sletteformular__felt input[type="email"] {
+	font: inherit;
+	font-size: 15px;
+	padding: 9px 12px;
+	border: 1px solid rgba( 0, 0, 0, 0.2 );
+	border-radius: 6px;
+	min-width: 260px;
+}
+.cookie-samtykke-sletteformular__knap {
+	font-family: inherit;
+	font-size: 13.5px;
+	font-weight: 700;
+	border-radius: 999px;
+	padding: 11px 20px;
+	cursor: pointer;
+	border: 2px solid transparent;
+	background: var( --cs-accent, #f7c24b );
+	color: var( --cs-accent-text, #1b1b1b );
+}
+.cookie-samtykke-melding {
+	padding: 12px 16px;
+	border-radius: 8px;
+	background: rgba( 30, 130, 76, 0.1 );
+	border: 1px solid rgba( 30, 130, 76, 0.3 );
+}
+.cookie-samtykke-melding--fejl {
+	background: rgba( 200, 50, 50, 0.08 );
+	border-color: rgba( 200, 50, 50, 0.3 );
+}
+
 @media ( max-width: 640px ) {
+	.cookie-samtykke-sletteformular {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.cookie-samtykke-sletteformular__felt input[type="email"] {
+		min-width: 0;
+		width: 100%;
+		box-sizing: border-box;
+	}
 	.cookie-samtykke-flydende {
 		left: 10px;
 		bottom: 10px;
