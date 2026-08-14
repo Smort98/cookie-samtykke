@@ -27,6 +27,20 @@ function cookie_samtykke_hent_tekster(): array {
 	return wp_parse_args( is_array( $gemt ) ? $gemt : array(), cookie_samtykke_standard_tekster() );
 }
 
+/**
+ * Virksomhedsoplysninger til den genererede privatlivspolitik. Falder
+ * tilbage til sitets navn, hvis der ikke er udfyldt et virksomhedsnavn.
+ */
+function cookie_samtykke_hent_virksomhed(): array {
+	$standard = array( 'navn' => '', 'cvr' => '', 'adresse' => '', 'postnr_by' => '', 'telefon' => '' );
+	$gemt     = get_option( 'cookie_samtykke_virksomhed', array() );
+	$virk     = wp_parse_args( is_array( $gemt ) ? $gemt : array(), $standard );
+	if ( '' === $virk['navn'] ) {
+		$virk['navn'] = get_bloginfo( 'name' );
+	}
+	return $virk;
+}
+
 function cookie_samtykke_registrer_indstillinger() {
 	register_setting(
 		'cookie_samtykke',
@@ -99,6 +113,23 @@ function cookie_samtykke_registrer_indstillinger() {
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'default'           => 0,
+		)
+	);
+	register_setting(
+		'cookie_samtykke',
+		'cookie_samtykke_virksomhed',
+		array(
+			'type'              => 'array',
+			'sanitize_callback' => function ( $input ) {
+				$output = array( 'navn' => '', 'cvr' => '', 'adresse' => '', 'postnr_by' => '', 'telefon' => '' );
+				foreach ( $output as $key => $default ) {
+					if ( isset( $input[ $key ] ) ) {
+						$output[ $key ] = sanitize_text_field( $input[ $key ] );
+					}
+				}
+				return $output;
+			},
+			'default'           => array( 'navn' => '', 'cvr' => '', 'adresse' => '', 'postnr_by' => '', 'telefon' => '' ),
 		)
 	);
 	register_setting(
@@ -181,6 +212,7 @@ function cookie_samtykke_render_side() {
 	$flydende_ikon = (bool) get_option( 'cookie_samtykke_flydende_ikon', true );
 	$kategorier    = wp_parse_args( get_option( 'cookie_samtykke_kategorier', array() ), array( 'statistik' => true, 'marketing' => true ) );
 	$privatliv     = (int) get_option( 'cookie_samtykke_privatliv_side', 0 );
+	$virksomhed    = wp_parse_args( get_option( 'cookie_samtykke_virksomhed', array() ), array( 'navn' => '', 'cvr' => '', 'adresse' => '', 'postnr_by' => '', 'telefon' => '' ) );
 	$tekster       = cookie_samtykke_hent_tekster();
 	$auto_farver   = cookie_samtykke_hent_farver();
 	?>
@@ -273,6 +305,31 @@ function cookie_samtykke_render_side() {
 				<tr>
 					<th scope="row"><label for="cs_marketing_tekst">Marketing — beskrivelse</label></th>
 					<td><input type="text" id="cs_marketing_tekst" class="large-text" name="cookie_samtykke_tekster[marketing_tekst]" value="<?php echo esc_attr( $tekster['marketing_tekst'] ); ?>"></td>
+				</tr>
+			</table>
+
+			<h2 class="title">Virksomhedsoplysninger</h2>
+			<p>Bruges til den automatisk genererede privatlivspolitik (afsnittet "Dataansvarlig"). Stå tomme felter over, falder den tilbage til sitets navn og admin-e-mail.</p>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><label for="cs_virk_navn">Virksomhedsnavn</label></th>
+					<td><input type="text" id="cs_virk_navn" class="regular-text" name="cookie_samtykke_virksomhed[navn]" value="<?php echo esc_attr( $virksomhed['navn'] ); ?>" placeholder="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="cs_virk_cvr">CVR-nummer</label></th>
+					<td><input type="text" id="cs_virk_cvr" class="regular-text" name="cookie_samtykke_virksomhed[cvr]" value="<?php echo esc_attr( $virksomhed['cvr'] ); ?>"></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="cs_virk_adresse">Adresse</label></th>
+					<td><input type="text" id="cs_virk_adresse" class="regular-text" name="cookie_samtykke_virksomhed[adresse]" value="<?php echo esc_attr( $virksomhed['adresse'] ); ?>" placeholder="Vejnavn 1"></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="cs_virk_postnr_by">Postnr. og by</label></th>
+					<td><input type="text" id="cs_virk_postnr_by" class="regular-text" name="cookie_samtykke_virksomhed[postnr_by]" value="<?php echo esc_attr( $virksomhed['postnr_by'] ); ?>" placeholder="5750 Ringe"></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="cs_virk_telefon">Telefon</label></th>
+					<td><input type="text" id="cs_virk_telefon" class="regular-text" name="cookie_samtykke_virksomhed[telefon]" value="<?php echo esc_attr( $virksomhed['telefon'] ); ?>"></td>
 				</tr>
 			</table>
 
