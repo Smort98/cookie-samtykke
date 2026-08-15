@@ -62,7 +62,7 @@ function cookie_samtykke_er_hex( $vaerdi ): bool {
  * for en hex-værdi direkte. Prøv at slå den op i det aktive temas
  * palet; kan den ikke findes, returneres en fornuftig standardfarve.
  */
-function cookie_samtykke_resolve_var( string $vaerdi ): string {
+function cookie_samtykke_resolve_var( string $vaerdi, string $fallback = COOKIE_SAMTYKKE_STANDARD_FARVER['accent'] ): string {
 	if ( cookie_samtykke_er_hex( $vaerdi ) ) {
 		return $vaerdi;
 	}
@@ -77,7 +77,7 @@ function cookie_samtykke_resolve_var( string $vaerdi ): string {
 			}
 		}
 	}
-	return COOKIE_SAMTYKKE_STANDARD_FARVER['accent'];
+	return $fallback;
 }
 
 function cookie_samtykke_hex_til_hsl( string $hex ): array {
@@ -143,8 +143,12 @@ function cookie_samtykke_hent_farver(): array {
 	$baggrund_raw = wp_get_global_styles( array( 'color', 'text' ) ); // banneret vender temaets farver om: mørk baggrund, lys tekst virker bedst som en bjælke der skiller sig ud
 	$tekst_raw    = wp_get_global_styles( array( 'color', 'background' ) );
 
-	$baggrund = cookie_samtykke_er_hex( $baggrund_raw ) ? $baggrund_raw : cookie_samtykke_resolve_var( (string) $baggrund_raw );
-	$tekst    = cookie_samtykke_er_hex( $tekst_raw ) ? $tekst_raw : cookie_samtykke_resolve_var( (string) $tekst_raw );
+	// Klassiske temaer uden theme.json kan give et array tilbage (ingen leaf-værdi at hente), ikke en hex-streng
+	$baggrund_raw = is_string( $baggrund_raw ) ? $baggrund_raw : '';
+	$tekst_raw    = is_string( $tekst_raw ) ? $tekst_raw : '';
+
+	$baggrund = cookie_samtykke_er_hex( $baggrund_raw ) ? $baggrund_raw : cookie_samtykke_resolve_var( $baggrund_raw, COOKIE_SAMTYKKE_STANDARD_FARVER['baggrund'] );
+	$tekst    = cookie_samtykke_er_hex( $tekst_raw ) ? $tekst_raw : cookie_samtykke_resolve_var( $tekst_raw, COOKIE_SAMTYKKE_STANDARD_FARVER['tekst'] );
 
 	if ( ! cookie_samtykke_er_hex( $baggrund ) ) {
 		$baggrund = COOKIE_SAMTYKKE_STANDARD_FARVER['baggrund'];
