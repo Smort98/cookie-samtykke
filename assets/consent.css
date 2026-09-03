@@ -243,3 +243,69 @@
 		text-align: center;
 	}
 }
+
+/*
+ * Wrapperen om hele den genererede privatlivs-/cookiepolitik. Egen klasse +
+ * CSS i stedet for kun inline style/blok-attributter på gruppen — så
+ * centreringen ikke er afhængig af, at temaets layout-understøttelse (eller
+ * en evt. sanering af gemt indhold) lader inline-styling overleve.
+ *
+ * Selve wrapperen er bredere end brødteksten, så tabellen kan få mere plads
+ * at ånde i — ligesom referencen (dartgrej.dk) giver tabeller ekstra bredde
+ * ift. almindelig tekst. Alle børn UNDTAGEN tabellen strammes ind til en
+ * smal, læsevenlig kolonne igen nedenfor.
+ */
+.cookie-samtykke-politik-wrap {
+	max-width: 1000px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 56px 20px 72px;
+	box-sizing: border-box;
+}
+.cookie-samtykke-politik-wrap > *:not( .cookie-samtykke-politiktabel-wrap ) {
+	max-width: 760px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/*
+ * Tabellerne i den genererede privatlivs-/cookiepolitik. Egen styling i
+ * stedet for at læne sig op ad temaets standard wp-block-table-udseende —
+ * dels fylder kernens tabelstil ikke altid pænt, dels indlæses den slet ikke,
+ * når tabellen indsættes via kortkoden [cookie_samtykke_cookie_tabel] (temaet
+ * opdager kun blok-CSS-behov ud fra de blokke der reelt ligger i sidens
+ * gemte indhold). Udseendet (fuld gitterramme, rundhåndet padding, ingen
+ * formindsket skrift) matcher bevidst et andet, velfungerende cookie-plugin
+ * som reference for et roligt, professionelt udseende.
+ */
+.cookie-samtykke-politiktabel-wrap {
+	overflow-x: auto;
+	margin: 12px 0 24px;
+}
+.cookie-samtykke-politiktabel {
+	width: 100%;
+	min-width: 700px;
+	border-collapse: collapse;
+	border: 1px solid #e2e2e2;
+	background: #fff;
+	font-size: 14px;
+	line-height: 1.45;
+}
+.cookie-samtykke-politiktabel th,
+.cookie-samtykke-politiktabel td {
+	padding: 14px 16px;
+	border: 1px solid #e5e5e5;
+	color: #202020;
+	text-align: left;
+	vertical-align: top;
+}
+.cookie-samtykke-politiktabel td {
+	overflow-wrap: break-word;
+}
+.cookie-samtykke-politiktabel th {
+	background: #f4f4f4;
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+	white-space: nowrap;
+}

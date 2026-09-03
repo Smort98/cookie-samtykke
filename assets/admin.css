@@ -1,0 +1,304 @@
+/*
+ * Site Admin UI-kit — et lille, selvstændigt design-system til wp-admin-sider.
+ * Scopet under .sadmin, så det aldrig påvirker resten af wp-admin. Tænkt som
+ * en kopierbar skabelon til fremtidige plugins/temafunktioner: re-farv
+ * tokens'ene i toppen, komponenterne nedenfor kan genbruges som de er.
+ */
+
+.sadmin {
+	--sadmin-header-bg: #1f2937;
+	--sadmin-header-text: #f8fafc;
+	--sadmin-header-muted: #94a3b8;
+	--sadmin-accent: #3b5bdb;
+	--sadmin-accent-hover: #2f4bc7;
+	--sadmin-accent-text: #ffffff;
+	--sadmin-bg: #f1f5f9;
+	--sadmin-card-bg: #ffffff;
+	--sadmin-border: #e2e8f0;
+	--sadmin-text: #1e293b;
+	--sadmin-muted: #64748b;
+	--sadmin-ok-text: #16a34a;
+	--sadmin-ok-bg: #dcfce7;
+	--sadmin-neutral-text: #64748b;
+	--sadmin-neutral-bg: #f1f5f9;
+
+	background: var( --sadmin-bg );
+	padding: 20px 24px 48px;
+	margin: 0 20px 0 0;
+	box-sizing: border-box;
+}
+.sadmin *,
+.sadmin *::before,
+.sadmin *::after {
+	box-sizing: border-box;
+}
+
+.sadmin-header {
+	background: var( --sadmin-header-bg );
+	color: var( --sadmin-header-text );
+	border-radius: 8px;
+	padding: 28px 32px;
+	margin: 20px 0 20px;
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 24px;
+	flex-wrap: wrap;
+}
+.sadmin-header__eyebrow {
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-size: 11px;
+	font-weight: 600;
+	color: var( --sadmin-header-muted );
+	margin: 0 0 6px;
+}
+.sadmin-header h1 {
+	color: var( --sadmin-header-text );
+	margin: 0 0 8px;
+	padding: 0;
+	font-size: 22px;
+	line-height: 1.3;
+}
+.sadmin-header p {
+	color: var( --sadmin-header-muted );
+	margin: 0;
+	max-width: 640px;
+	font-size: 13px;
+	line-height: 1.6;
+}
+.sadmin-header__badges {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	flex-shrink: 0;
+}
+.sadmin-header__badge {
+	background: rgba( 255, 255, 255, 0.08 );
+	border: 1px solid rgba( 255, 255, 255, 0.14 );
+	color: var( --sadmin-header-text );
+	border-radius: 999px;
+	padding: 6px 14px;
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.sadmin-tabs {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+	margin: 0 0 20px;
+}
+.sadmin-tabs a {
+	display: inline-block;
+	background: var( --sadmin-card-bg );
+	border: 1px solid var( --sadmin-border );
+	color: var( --sadmin-text );
+	border-radius: 999px;
+	padding: 8px 18px;
+	font-size: 13px;
+	font-weight: 500;
+	text-decoration: none;
+	box-shadow: none;
+}
+.sadmin-tabs a:hover {
+	border-color: var( --sadmin-accent );
+	color: var( --sadmin-accent );
+}
+.sadmin-tabs a.is-active {
+	background: var( --sadmin-accent );
+	border-color: var( --sadmin-accent );
+	color: var( --sadmin-accent-text );
+}
+.sadmin-tabs a.is-active:hover {
+	color: var( --sadmin-accent-text );
+}
+
+.sadmin-card {
+	background: var( --sadmin-card-bg );
+	border: 1px solid var( --sadmin-border );
+	border-radius: 8px;
+	padding: 24px 28px;
+	margin: 0 0 20px;
+	box-shadow: 0 1px 2px rgba( 15, 23, 42, 0.04 );
+}
+.sadmin-card > h2 {
+	font-size: 15px;
+	margin: 0 0 4px;
+	padding: 0;
+	color: var( --sadmin-text );
+}
+.sadmin-card > .sadmin-card__intro {
+	color: var( --sadmin-muted );
+	font-size: 13px;
+	margin: 0 0 18px;
+	max-width: 720px;
+}
+
+/* Reskin af eksisterende .form-table-markup — selve PHP-markuppen er urørt */
+.sadmin-card .form-table {
+	margin-top: 0;
+}
+.sadmin-card .form-table th {
+	width: 220px;
+	padding: 16px 16px 16px 0;
+	color: var( --sadmin-text );
+	font-weight: 600;
+	font-size: 13px;
+}
+.sadmin-card .form-table td {
+	padding: 12px 0;
+	font-size: 13px;
+	color: var( --sadmin-text );
+}
+.sadmin-card .form-table tr {
+	border-bottom: 1px solid var( --sadmin-border );
+}
+.sadmin-card .form-table tr:last-child {
+	border-bottom: none;
+}
+.sadmin-card .description {
+	color: var( --sadmin-muted );
+}
+
+.sadmin .button-primary {
+	background: var( --sadmin-accent );
+	border-color: var( --sadmin-accent );
+	color: var( --sadmin-accent-text );
+	border-radius: 999px;
+	padding: 4px 18px;
+	height: auto;
+	line-height: 2;
+	box-shadow: none;
+	text-shadow: none;
+}
+.sadmin .button-primary:hover,
+.sadmin .button-primary:focus {
+	background: var( --sadmin-accent-hover );
+	border-color: var( --sadmin-accent-hover );
+	color: var( --sadmin-accent-text );
+}
+.sadmin .button-secondary {
+	border-radius: 999px;
+	padding: 4px 18px;
+	height: auto;
+	line-height: 2;
+	box-shadow: none;
+}
+
+.sadmin-table-wrap {
+	border: 1px solid var( --sadmin-border );
+	border-radius: 8px;
+	overflow: hidden;
+}
+.sadmin-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+.sadmin-table th {
+	text-align: left;
+	background: var( --sadmin-bg );
+	color: var( --sadmin-muted );
+	font-weight: 600;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 10px 16px;
+	border-bottom: 1px solid var( --sadmin-border );
+}
+.sadmin-table td {
+	padding: 12px 16px;
+	border-bottom: 1px solid var( --sadmin-border );
+	color: var( --sadmin-text );
+	vertical-align: top;
+}
+.sadmin-table tr:last-child td {
+	border-bottom: none;
+}
+.sadmin-table tr:nth-child( even ) td {
+	background: rgba( 241, 245, 249, 0.5 );
+}
+
+.sadmin-badge {
+	display: inline-block;
+	border-radius: 999px;
+	padding: 3px 10px;
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+.sadmin-badge--ok {
+	background: var( --sadmin-ok-bg );
+	color: var( --sadmin-ok-text );
+}
+.sadmin-badge--neutral {
+	background: var( --sadmin-neutral-bg );
+	color: var( --sadmin-neutral-text );
+}
+
+.sadmin-empty {
+	color: var( --sadmin-muted );
+	font-size: 13px;
+	padding: 8px 0;
+}
+
+.sadmin-row-card {
+	border: 1px solid var( --sadmin-border );
+	border-radius: 8px;
+	padding: 16px 20px;
+	margin: 0 0 12px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+.sadmin-row-card:last-child {
+	margin-bottom: 0;
+}
+.sadmin-row-card__title {
+	font-weight: 600;
+	font-size: 13px;
+	color: var( --sadmin-text );
+	margin: 0 0 4px;
+}
+.sadmin-row-card__meta {
+	font-size: 12px;
+	color: var( --sadmin-muted );
+}
+.sadmin-row-card__meta a {
+	color: var( --sadmin-accent );
+}
+.sadmin-row-card__actions {
+	flex-shrink: 0;
+}
+
+@media ( max-width: 782px ) {
+	.sadmin {
+		margin-left: 0;
+		padding: 0 12px 32px;
+	}
+	.sadmin-header {
+		padding: 20px;
+	}
+	.sadmin-card {
+		padding: 18px 16px;
+	}
+	.sadmin-card .form-table th {
+		width: auto;
+		display: block;
+		padding: 0 0 4px;
+	}
+	.sadmin-card .form-table td {
+		display: block;
+		padding: 0 0 16px;
+	}
+	.sadmin-row-card {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.sadmin-table-wrap {
+		overflow-x: auto;
+	}
+}

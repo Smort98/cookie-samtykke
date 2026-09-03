@@ -26,6 +26,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * show_in_menu er bevidst false: anmodninger vises nu i sin egen fane på
+ * Cookie-samtykke-siden (samme design som resten af pluginet) i stedet for
+ * WordPress' indbyggede post-liste. show_ui er stadig true, så CPT'en
+ * fortsat kan tilgås direkte (edit.php?post_type=cs_anmodning) ved behov.
+ */
 function cookie_samtykke_registrer_cpt_anmodning() {
 	register_post_type(
 		'cs_anmodning',
@@ -38,7 +44,7 @@ function cookie_samtykke_registrer_cpt_anmodning() {
 			'public'             => false,
 			'publicly_queryable' => false,
 			'show_ui'            => true,
-			'show_in_menu'       => 'cookie-samtykke',
+			'show_in_menu'       => false,
 			'show_in_rest'       => false,
 			'supports'           => array( 'title' ),
 			'has_archive'        => false,

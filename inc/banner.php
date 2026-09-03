@@ -7,8 +7,8 @@
 defined( 'ABSPATH' ) || exit;
 
 function cookie_samtykke_assets() {
-	wp_enqueue_style( 'cookie-samtykke', COOKIE_SAMTYKKE_URL . 'assets/consent.css', array(), COOKIE_SAMTYKKE_VERSION );
-	wp_enqueue_script( 'cookie-samtykke', COOKIE_SAMTYKKE_URL . 'assets/consent.js', array(), COOKIE_SAMTYKKE_VERSION, true );
+	wp_enqueue_style( 'cookie-samtykke', COOKIE_SAMTYKKE_URL . 'assets/consent.css', array(), cookie_samtykke_asset_version( 'assets/consent.css' ) );
+	wp_enqueue_script( 'cookie-samtykke', COOKIE_SAMTYKKE_URL . 'assets/consent.js', array(), cookie_samtykke_asset_version( 'assets/consent.js' ), true );
 
 	$farver     = cookie_samtykke_hent_farver();
 	$kategorier = wp_parse_args( get_option( 'cookie_samtykke_kategorier', array() ), array( 'statistik' => true, 'marketing' => true ) );
@@ -36,6 +36,18 @@ function cookie_samtykke_assets() {
 	wp_add_inline_style( 'cookie-samtykke', $inline_css );
 }
 add_action( 'wp_enqueue_scripts', 'cookie_samtykke_assets' );
+
+/**
+ * consent.css indeholder også styling af den genererede privatlivs-/
+ * cookiepolitik (tabeller, indholdsbredde m.m.). Den styling skal også være
+ * synlig inde i blok-editorens forhåndsvisning, ikke kun på den gemte side —
+ * ellers ser redaktøren råt, ustylet indhold mens der redigeres. wp_enqueue_
+ * scripts fyrer ikke inde i editoren, så det kræver sit eget hook.
+ */
+function cookie_samtykke_editor_assets() {
+	wp_enqueue_style( 'cookie-samtykke', COOKIE_SAMTYKKE_URL . 'assets/consent.css', array(), cookie_samtykke_asset_version( 'assets/consent.css' ) );
+}
+add_action( 'enqueue_block_editor_assets', 'cookie_samtykke_editor_assets' );
 
 function cookie_samtykke_render_banner() {
 	$tekster    = cookie_samtykke_hent_tekster();

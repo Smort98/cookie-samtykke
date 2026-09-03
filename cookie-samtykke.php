@@ -16,6 +16,18 @@ define( 'COOKIE_SAMTYKKE_FIL', __FILE__ );
 define( 'COOKIE_SAMTYKKE_STI', plugin_dir_path( __FILE__ ) );
 define( 'COOKIE_SAMTYKKE_URL', plugin_dir_url( __FILE__ ) );
 
+/**
+ * Version til brug ved wp_enqueue_style/script — baseret på filens sidste
+ * ændringstidspunkt i stedet for det faste COOKIE_SAMTYKKE_VERSION-tal, så
+ * browsere automatisk henter den nye fil, hver gang den redigeres, i stedet
+ * for at blive ved med at vise en cachet, forældet udgave.
+ */
+function cookie_samtykke_asset_version( string $relativ_sti ): string {
+	$fuld_sti = COOKIE_SAMTYKKE_STI . ltrim( $relativ_sti, '/' );
+	$tid      = file_exists( $fuld_sti ) ? filemtime( $fuld_sti ) : false;
+	return $tid ? (string) $tid : COOKIE_SAMTYKKE_VERSION;
+}
+
 require_once COOKIE_SAMTYKKE_STI . 'inc/farver.php';
 require_once COOKIE_SAMTYKKE_STI . 'inc/indstillinger.php';
 require_once COOKIE_SAMTYKKE_STI . 'inc/banner.php';

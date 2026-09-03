@@ -312,9 +312,10 @@ function cookie_samtykke_haandter_scan() {
 		add_query_arg(
 			array(
 				'page'       => 'cookie-samtykke',
+				'fane'       => 'scanner',
 				'cs_scannet' => 1,
 			),
-			admin_url( 'options-general.php' )
+			admin_url( 'admin.php' )
 		)
 	);
 	exit;
