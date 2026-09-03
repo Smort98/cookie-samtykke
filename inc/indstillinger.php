@@ -358,12 +358,12 @@ function cookie_samtykke_render_side() {
 		</form>
 
 		<h2 class="title">Tjenester fundet på sitet</h2>
-		<p>Scanner temaets og de aktive plugins' kildekode samt indholdet af alle offentliggjorte sider/indlæg for kendte tredjepartstjenester (fx Google Analytics, Facebook Pixel, YouTube, Google Maps). Bruges automatisk til at udfylde cookiepolitikken med det, sitet faktisk bruger, i stedet for generisk tekst.</p>
+		<p>Scanner temaets og de aktive plugins' kildekode samt indholdet af alle offentliggjorte sider/indlæg for kendte tredjepartstjenester (fx Google Analytics, Facebook Pixel, YouTube, Google Maps), og tjekker samtidig om kendte platform-cookies (WordPress-login, WooCommerce) faktisk er i brug på sitet. Bruges automatisk til at udfylde cookiepolitikken med det, sitet faktisk bruger, i stedet for generisk tekst.</p>
 		<?php
 		$scan_tid       = (int) get_option( 'cookie_samtykke_scan_tidspunkt', 0 );
 		$scan_resultat  = (array) get_option( 'cookie_samtykke_scan_resultat', array() );
 		$scan_kode      = (array) get_option( 'cookie_samtykke_scan_kode_resultat', array() );
-		$alle_tjenester = cookie_samtykke_kendte_tjenester();
+		$alle_tjenester = cookie_samtykke_kendte_tjenester() + cookie_samtykke_platform_tjenester();
 		?>
 		<?php if ( $scan_tid ) : ?>
 			<p>Sidst scannet: <?php echo esc_html( date_i18n( 'j. F Y \k\l. H:i', $scan_tid ) ); ?></p>

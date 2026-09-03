@@ -101,7 +101,7 @@ function cookie_samtykke_generer_cookiepolitik_indhold(): string {
 
 	$scan_tid       = (int) get_option( 'cookie_samtykke_scan_tidspunkt', 0 );
 	$scan_noegler   = (array) get_option( 'cookie_samtykke_scan_resultat', array() );
-	$alle_tjenester = cookie_samtykke_kendte_tjenester();
+	$alle_tjenester = cookie_samtykke_kendte_tjenester() + cookie_samtykke_platform_tjenester();
 	$fundne         = array_intersect_key( $alle_tjenester, array_flip( $scan_noegler ) );
 
 	$dele = array();

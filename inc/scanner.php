@@ -98,6 +98,50 @@ function cookie_samtykke_kendte_tjenester(): array {
 	);
 }
 
+/**
+ * "Platform"-cookies — sat af WordPress-kernen selv eller af velkendte
+ * plugins (fx WooCommerce), i modsætning til tredjepartstjenester ovenfor.
+ * Kan ikke findes ved at lede efter en signatur i sidens indhold, så de
+ * tjekkes i stedet ud fra, om det pågældende system faktisk er til stede
+ * (fx om WooCommerce er installeret og aktivt).
+ */
+function cookie_samtykke_platform_tjenester(): array {
+	return array(
+		'wp_login'    => array(
+			'navn'          => 'WordPress (login)',
+			'kategori'      => 'nodvendige',
+			'cookies'       => 'wordpress_logged_in_*, wordpress_sec_*, wp-settings-*',
+			'varighed'      => 'session til ca. 1 år',
+			'beskrivelse'   => 'Sættes, når en bruger logger ind, for at holde login og huske brugerens indstillinger i administrationen.',
+			'databehandler' => 'Os selv',
+			'til_stede'     => static function (): bool {
+				return true;
+			},
+		),
+		'woocommerce' => array(
+			'navn'          => 'WooCommerce',
+			'kategori'      => 'nodvendige',
+			'cookies'       => 'woocommerce_cart_hash, woocommerce_items_in_cart, wc_cart_hash_*, wc_fragments_*, wp_woocommerce_session_*',
+			'varighed'      => 'session til op til 2 dage',
+			'beskrivelse'   => 'Bruges til at huske indholdet af indkøbskurven og knytte den til den besøgende.',
+			'databehandler' => 'Os selv',
+			'til_stede'     => static function (): bool {
+				return class_exists( 'WooCommerce' );
+			},
+		),
+	);
+}
+
+function cookie_samtykke_scan_platform(): array {
+	$fundne = array();
+	foreach ( cookie_samtykke_platform_tjenester() as $noegle => $data ) {
+		if ( ! empty( $data['til_stede'] ) && is_callable( $data['til_stede'] ) && $data['til_stede']() ) {
+			$fundne[] = $noegle;
+		}
+	}
+	return $fundne;
+}
+
 function cookie_samtykke_kategori_navn( string $kategori ): string {
 	$navne = array(
 		'nodvendige' => 'Nødvendige',
@@ -248,7 +292,7 @@ function cookie_samtykke_scan_database(): array {
  *   Vises kun til admin som info, ikke i den offentlige tekst.
  */
 function cookie_samtykke_koer_scan(): array {
-	$indhold = cookie_samtykke_scan_database();
+	$indhold = array_unique( array_merge( cookie_samtykke_scan_database(), cookie_samtykke_scan_platform() ) );
 	$kode    = array_values( array_diff( cookie_samtykke_scan_kildefiler(), $indhold ) );
 	update_option( 'cookie_samtykke_scan_resultat', $indhold );
 	update_option( 'cookie_samtykke_scan_kode_resultat', $kode );
