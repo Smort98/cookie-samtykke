@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Cookie-samtykke
  * Description: Simpel, GDPR-venlig cookie-samtykkebanner. Farverne tilpasser sig automatisk temaets theme.json (block-temaer), med manuel override for temaer uden. Beregnet til at blive genbrugt på tværs af sites.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: Søren
  * Text Domain: cookie-samtykke
  * Requires at least: 6.0
@@ -12,7 +12,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'COOKIE_SAMTYKKE_VERSION', '1.1.0' );
+define( 'COOKIE_SAMTYKKE_VERSION', '1.1.1' );
 define( 'COOKIE_SAMTYKKE_FIL', __FILE__ );
 define( 'COOKIE_SAMTYKKE_STI', plugin_dir_path( __FILE__ ) );
 define( 'COOKIE_SAMTYKKE_URL', plugin_dir_url( __FILE__ ) );
