@@ -1,13 +1,15 @@
 <?php
 /**
- * Scanner temaets og de aktive plugins' kildekode samt indholdet af alle
- * offentliggjorte sider/indlæg for kendte tredjepartstjenester (Google
- * Analytics, Facebook Pixel, YouTube m.fl.), så cookiepolitikken kan
- * udfyldes med det, sitet faktisk bruger — i stedet for generisk tekst.
+ * Scanner temaets og de aktive plugins' kildekode, indholdet af alle
+ * offentliggjorte sider/indlæg, samt sitets faktiske udsendte HTML for
+ * kendte tredjepartstjenester (Google Analytics, Facebook Pixel, YouTube
+ * m.fl.), så cookiepolitikken kan udfyldes med det, sitet faktisk bruger —
+ * i stedet for generisk tekst.
  *
- * Fungerer bedst når man selv ejer temaet og de aktive plugins (og dermed
- * kender koden), da den ikke kan se cookies sat af rent klientside-kode,
- * den ikke genkender signaturen på.
+ * HTML-scanningen fanger scripts der indsættes via plugin-indstillinger
+ * eller temakode (fx Google Site Kit, eller et gtag-snippet hardkodet i
+ * header.php), som hverken findes i sidernes gemte indhold eller kan
+ * skelnes pålideligt fra ubrugt understøttelse i kildefilerne.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -283,16 +285,68 @@ function cookie_samtykke_scan_database(): array {
 }
 
 /**
- * Kører begge scans og gemmer dem hver for sig:
- * - "indhold" (fundet i sidernes faktiske tekst) er høj sikkerhed og
- *   bruges direkte i den genererede cookiepolitik.
- * - "kode" (fundet i temaets/pluginnernes kildekode) er kun en indikation
- *   af, hvad der er teknisk understøttet — fx kan et blok-plugin have
- *   indbygget Google Maps-understøttelse, selvom siten ikke bruger det.
- *   Vises kun til admin som info, ikke i den offentlige tekst.
+ * Henter et udvalg af sitets faktisk udsendte sider (som en besøgende ville
+ * modtage dem — inkl. alt hvad temaet/plugins indsætter via wp_head o.l.) og
+ * leder efter kendte signaturer i den rå HTML. Fanger scripts der aldrig
+ * skrives ind i en sides indhold, fx indsat via en plugin-indstilling
+ * (Google Site Kit) eller hardkodet i temaets header.php.
+ */
+function cookie_samtykke_scan_frontend(): array {
+	$fundne    = array();
+	$tjenester = cookie_samtykke_kendte_tjenester();
+
+	$egne_sider = array_filter(
+		array(
+			(int) get_option( 'cookie_samtykke_privatliv_side', 0 ),
+			(int) get_option( 'cookie_samtykke_cookiepolitik_side', 0 ),
+		)
+	);
+
+	$urls = array( home_url( '/' ) );
+
+	$sider = get_posts(
+		array(
+			'post_type'      => array( 'page', 'post' ),
+			'post_status'    => 'publish',
+			'posts_per_page' => 15,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+			'post__not_in'   => $egne_sider,
+		)
+	);
+	foreach ( $sider as $id ) {
+		$urls[] = get_permalink( $id );
+	}
+
+	if ( function_exists( 'set_time_limit' ) ) {
+		@set_time_limit( 90 );
+	}
+
+	foreach ( array_unique( $urls ) as $url ) {
+		$svar = wp_remote_get( $url, array( 'timeout' => 8, 'sslverify' => false ) );
+		if ( is_wp_error( $svar ) || 200 !== (int) wp_remote_retrieve_response_code( $svar ) ) {
+			continue;
+		}
+		foreach ( cookie_samtykke_match_tjenester( wp_remote_retrieve_body( $svar ), $tjenester ) as $noegle ) {
+			$fundne[ $noegle ] = true;
+		}
+	}
+	return array_keys( $fundne );
+}
+
+/**
+ * Kører alle scans og gemmer dem samlet i to grupper:
+ * - "indhold" (fundet i sidernes gemte tekst, i platformens egen tilstand,
+ *   eller i sitets faktisk udsendte HTML) er høj sikkerhed og bruges
+ *   direkte i den genererede cookiepolitik.
+ * - "kode" (fundet i temaets/pluginnernes kildekode, men ingen af de
+ *   ovenstående) er kun en indikation af, hvad der er teknisk understøttet
+ *   — fx kan et blok-plugin have indbygget Google Maps-understøttelse,
+ *   selvom siten ikke bruger det. Vises kun til admin som info, ikke i den
+ *   offentlige tekst.
  */
 function cookie_samtykke_koer_scan(): array {
-	$indhold = array_unique( array_merge( cookie_samtykke_scan_database(), cookie_samtykke_scan_platform() ) );
+	$indhold = array_unique( array_merge( cookie_samtykke_scan_database(), cookie_samtykke_scan_frontend(), cookie_samtykke_scan_platform() ) );
 	$kode    = array_values( array_diff( cookie_samtykke_scan_kildefiler(), $indhold ) );
 	update_option( 'cookie_samtykke_scan_resultat', $indhold );
 	update_option( 'cookie_samtykke_scan_kode_resultat', $kode );
